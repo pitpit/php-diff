@@ -1,7 +1,7 @@
 PHP Diff
 ========
 
-PHP Component to compare variables easily (array, object, string).
+A comprehensive library for get differences between two variables (array, object, string...)
 
 Usage
 -----
