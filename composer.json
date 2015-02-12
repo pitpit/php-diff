@@ -1,0 +1,19 @@
+{
+    "name": "pitpit/php-diff",
+    "description": "Compare variables (array, object, string...) easily",
+    "license": "MIT",
+    "require": {
+        "php": ">=5.3.3"
+    },
+    "target-dir": "Pitpit/Diff",
+    "minimum-stability": "dev",
+    "autoload": {
+        "psr-0": { "Pitpit\\Diff": "src" }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0.x-dev"
+        }
+    }
+}
+
