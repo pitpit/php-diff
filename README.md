@@ -3,24 +3,45 @@ PHP Diff
 
 A comprehensive library for get differences between two variables (array, object, string...)
 
+Installation
+------------
+
+```
+php composer.phar require pitpit/diff:@dev
+```
+
 Usage
 -----
 
-class MyClassToCompare {
+```php
+include __DIR__ . "/vendor/autoload.php";
 
-    protected $value;
+class MyClassToCompare
+{
+    public $value;
 
     public function __construct($value)
     {
         $this->value = $value;
     }
+
+    public function getValue()
+   {
+    return $this->value;
+   }
 }
 
 $toCompare1 = new MyClassToCompare(4);
 $toCompare2 = new MyClassToCompare(9);
 
-$engine = new Pitpit\Diff\DiffEngine();
-$diff = $engine->compare($toCompare1, $toCompare2);
+$engine = new \Pitpit\Component\Diff\DiffEngine(array(
+    'MyClassToCompare' => array(
+        'value'
+    )
+));
+
+$diffs = $engine->compare($toCompare1, $toCompare2);
+php
 
 Run the tests
 -------------

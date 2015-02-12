@@ -1,8 +1,8 @@
 <?php
 
-namespace Pitpit\Diff\Tests;
+namespace Pitpit\Component\Diff\Tests;
 
-use Pitpit\Diff\Diff;
+use Pitpit\Component\Diff\Diff;
 
 class DiffTest extends \PHPUnit_Framework_TestCase
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Pitpit\Diff;
+namespace Pitpit\Component\Diff;
 
 /**
  * An object to compare two variable values.
