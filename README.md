@@ -6,8 +6,6 @@ A comprehensive library for get differences between two variables (array, object
 Usage
 -----
 
-### Compring objects
-
 class MyClassToCompare {
 
     protected $value;
