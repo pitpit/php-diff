@@ -41,7 +41,7 @@ $engine = new \Pitpit\Component\Diff\DiffEngine(array(
 ));
 
 $diffs = $engine->compare($toCompare1, $toCompare2);
-php
+```
 
 Run the tests
 -------------
