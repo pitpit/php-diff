@@ -5,7 +5,6 @@
     "require": {
         "php": ">=5.3.3"
     },
-    "target-dir": "Pitpit/Component/Diff",
     "minimum-stability": "dev",
     "autoload": {
         "psr-0": { "Pitpit\\Component\\Diff": "src" }
