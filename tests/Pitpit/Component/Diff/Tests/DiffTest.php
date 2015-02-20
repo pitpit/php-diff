@@ -8,8 +8,9 @@ class DiffTest extends \PHPUnit_Framework_TestCase
 {
     function testGetOldGetNew()
     {
-        $diff = new Diff('old', 'new');
+        $diff = new Diff('name', 'old', 'new');
 
+        $this->assertEquals('name', $diff->getIdentifier());
         $this->assertEquals('old', $diff->getOld());
         $this->assertEquals('new', $diff->getNew());
         $this->assertFalse($diff->isUnchanged());
@@ -20,11 +21,11 @@ class DiffTest extends \PHPUnit_Framework_TestCase
 
     function testGetValue()
     {
-        $diff = new Diff('old', 'new');
+        $diff = new Diff('name', 'old', 'new');
 
         $this->assertEquals('new', $diff->getValue());
 
-        $diff = new Diff('old', null);
+        $diff = new Diff('name', 'old', null);
         $diff->setStatus(Diff::STATUS_DELETED);
 
         $this->assertEquals('old', $diff->getValue(), 'If variable has been deleted, getValue() returns the old value');
@@ -32,7 +33,7 @@ class DiffTest extends \PHPUnit_Framework_TestCase
 
     function testGetUnchanged()
     {
-        $diff = new Diff('old', 'new');
+        $diff = new Diff('name', 'old', 'new');
         $diff->setStatus(Diff::STATUS_UNCHANGED);
 
         $this->assertTrue($diff->isUnchanged());
@@ -43,7 +44,7 @@ class DiffTest extends \PHPUnit_Framework_TestCase
 
     function testGetCreated()
     {
-        $diff = new Diff('old', 'new');
+        $diff = new Diff('name', 'old', 'new');
         $diff->setStatus(Diff::STATUS_CREATED);
 
         $this->assertFalse($diff->isUnchanged());
@@ -54,7 +55,7 @@ class DiffTest extends \PHPUnit_Framework_TestCase
 
     function testGetModified()
     {
-        $diff = new Diff('old', 'new');
+        $diff = new Diff('name', 'old', 'new');
         $diff->setStatus(Diff::STATUS_MODIFIED);
 
         $this->assertFalse($diff->isUnchanged());
@@ -65,7 +66,7 @@ class DiffTest extends \PHPUnit_Framework_TestCase
 
     function testGetDeleted()
     {
-        $diff = new Diff('old', 'new');
+        $diff = new Diff('name', 'old', 'new');
         $diff->setStatus(Diff::STATUS_DELETED);
 
         $this->assertFalse($diff->isUnchanged());

@@ -219,6 +219,19 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('foo3', $subdiff->getNew());
 
     }
+    function testCompareArrayCountable()
+    {
+        $engine = new DiffEngine();
+        $var1 = array('foo1', 'foo3');
+        $var2 = array('foo2', 'foo3');
+
+        //created
+        $diff = $engine->compare($var1, $var2);
+
+        //test iterator
+        $this->assertEquals(2, count($diff));
+    }
+
 
     function testCompareNullToArray()
     {
@@ -310,6 +323,16 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('foo1', $subdiff->getValue());
         $this->assertEquals('foo1', $subdiff->getOld());
         $this->assertEquals(null, $subdiff->getNew());
+    }
+
+    function testCompareScalarToArrayIterator()
+    {
+        $engine = new DiffEngine();
+        $var1 = array('foo1');
+        $var2 = 'foo2';
+
+        //created
+        $diff = $engine->compare($var1, $var2);
 
         //test iterator
         $i = 0;
@@ -325,7 +348,19 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
 
         }
         $this->assertEquals(1, $i);
+    }
 
+    function testCompareScalarToArrayCountable()
+    {
+        $engine = new DiffEngine();
+        $var1 = 'foo1';
+        $var2 = array('foo2');
+
+        //created
+        $diff = $engine->compare($var1, $var2);
+
+        //test iterator
+        $this->assertEquals(1, count($diff));
     }
 
     function testCompareNestedArray()
@@ -471,12 +506,7 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
 
     function testCompareObjects()
     {
-        $engine = new DiffEngine(array(
-            'Pitpit\Component\Diff\Tests\DiffEngineObject' => array(
-                'scalar',
-                'scalars'
-            )
-        ));
+        $engine = new DiffEngine();
         $var1 = new DiffEngineObject();
         $var2 = new DiffEngineObject();
         $var2->scalar = 'foo1';
@@ -515,12 +545,7 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
 
     function testCompareNestedObjects()
     {
-        $engine = new DiffEngine(array(
-            'Pitpit\Component\Diff\Tests\DiffEngineObject' => array(
-                'objects',
-                'scalar'
-            )
-        ));
+        $engine = new DiffEngine();
         $var1 = new DiffEngineObject();
         $var2 = new DiffEngineObject();
 
@@ -599,20 +624,79 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($object, $subdiff->getValue());
         $this->assertEquals($object, $subdiff->getOld());
         $this->assertEquals(null, $subdiff->getNew());
+    }
 
-        //test iterating
-        // $i = 0;
-        // foreach ($diff->objects as $subdiff) {
-        //     $i++;
-        //     $this->assertInstanceOf('Pitpit\Component\Diff\Diff', $subdiff);
-        //     $this->assertTrue($subdiff->isCreated());
-        //     $this->assertFalse($subdiff->isModified());
-        //     $this->assertFalse($subdiff->isDeleted());
-        //     $this->assertEquals($object, $subdiff->getValue());
-        //     $this->assertEquals(null, $subdiff->getOld());
-        //     $this->assertEquals($object, $subdiff->getNew());
-        // }
-        // $this->assertEquals(1, $i);
+    function testCompareObjectsFiltered()
+    {
+        $engine = new DiffEngine(array(
+            'Pitpit\Component\Diff\Tests\DiffEngineObject' => array(
+                'scalar'
+            )
+        ));
+
+        $var1 = new DiffEngineObject();
+        $var2 = new DiffEngineObject();
+        $var2->scalar = 'foo1';
+        $var2->scalars[] = 'foo1';
+
+        $diff = $engine->compare($var1, $var2);
+
+        $subdiff = $diff->scalar;
+        $this->assertInstanceOf('Pitpit\Component\Diff\Diff', $subdiff);
+
+        $this->assertfalse(isset($diff->scalars));
+    }
+
+    function testCompareObjectsCountable()
+    {
+        $engine = new DiffEngine();
+        $var1 = new DiffEngineObject();
+        $var2 = new DiffEngineObject();
+
+        $var1->scalar = 'foo1';
+        $var2->scalar = 'foo2';
+
+        $diff = $engine->compare($var1, $var2);
+
+        $this->assertEquals(3, count($diff));
+
+    }
+
+
+    function testCompareObjectsIterator()
+    {
+        $engine = new DiffEngine();
+        $var1 = new DiffEngineObject();
+        $var2 = new DiffEngineObject();
+
+        $var1->scalar = 'foo1';
+        $var2->scalar = 'foo2';
+
+        $diff = $engine->compare($var1, $var2);
+
+        $i = 0;
+        foreach ($diff as $subdiff) {
+            $i++;
+            $this->assertInstanceOf('Pitpit\Component\Diff\Diff', $subdiff);
+            $this->assertFalse($subdiff->isCreated());
+            $this->assertFalse($subdiff->isDeleted());
+
+            if ($subdiff->getIdentifier() === 'scalar') {
+                $this->assertTrue($subdiff->isModified());
+                $this->assertEquals($var1->scalar, $subdiff->getOld());
+                $this->assertEquals($var2->scalar, $subdiff->getNew());
+            } else if ($subdiff->getIdentifier() === 'scalars') {
+                $this->assertFalse($subdiff->isModified());
+                $this->assertEquals($var1->scalars, $subdiff->getOld());
+                $this->assertEquals($var2->scalars, $subdiff->getNew());
+            } else if ($subdiff->getIdentifier() === 'objects') {
+                $this->assertFalse($subdiff->isModified());
+                $this->assertEquals($var1->objects, $subdiff->getOld());
+                $this->assertEquals($var2->objects, $subdiff->getNew());
+            }
+
+        }
+        $this->assertEquals(3, $i);
     }
 
     /**

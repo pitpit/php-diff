@@ -7,14 +7,24 @@ Installation
 ------------
 
 ```
-php composer.phar require pitpit/diff:@dev
+php composer.phar require "pitpit/diff":"@dev"
 ```
 
 Usage
 -----
 
+## Comparing string
+
 ```php
-include __DIR__ . "/vendor/autoload.php";
+$engine = new \Pitpit\Component\Diff\DiffEngine();
+$diff = $engine->compare('test1', 'test2');
+
+echo $diff->isModified();
+```
+
+## Comparing objects
+
+```php
 
 class MyClassToCompare
 {
@@ -26,21 +36,31 @@ class MyClassToCompare
     }
 
     public function getValue()
-   {
-    return $this->value;
-   }
+    {
+        return $this->value;
+    }
 }
 
 $toCompare1 = new MyClassToCompare(4);
 $toCompare2 = new MyClassToCompare(9);
 
-$engine = new \Pitpit\Component\Diff\DiffEngine(array(
-    'MyClassToCompare' => array(
-        'value'
-    )
-));
+$engine = new \Pitpit\Component\Diff\DiffEngine();
 
 $diffs = $engine->compare($toCompare1, $toCompare2);
+
+if ($diffs->isModified()) {
+
+    //iterate on each child item to compare (properties, methods, constants)
+    foreach ($diffs as $diff) {
+        print_r("----\n");
+        print_r('id: ' . $diff->getIdentifier()."\n");
+        print_r('modified: ' . $diff->isModified()."\n");
+        print_r('created: ' . $diff->isCreated()."\n");
+        print_r('deleted: ' . $diff->isDeleted()."\n");
+        print_r('old: ' . var_export($diff->getOld(), true)."\n");
+        print_r('new: ' . var_export($diff->getNew(), true)."\n");
+    }
+}
 ```
 
 Run the tests

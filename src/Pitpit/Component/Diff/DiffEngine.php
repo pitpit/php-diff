@@ -16,7 +16,7 @@ class DiffEngine
      *
      * @param array $map The properties and methods tou want to compare (where keys are  full classname and values the properties or method)
      */
-    public function __construct(array $map = array())
+    public function __construct(array $map = null)
     {
         $this->map = $map;
     }
@@ -26,14 +26,16 @@ class DiffEngine
      *
      * @param mixed  $old    An object
      * @param mixed  $new    An object
+     * @param string $identifier   A name for the variable
      * @param string $status Force a status
      *
      * @return Diff
      */
-    public function compare($old, $new, $status = null)
+    public function compare($old, $new, $identifier = null, $status = null)
     {
-        $diff = new Diff($old, $new);
+        $diff = new Diff($identifier, $old, $new);
 
+        //compare an objet to something else
         if (is_object($old) || is_object($new)) {
 
             //$old or $new could be null
@@ -44,11 +46,30 @@ class DiffEngine
             }
 
             if (!is_null($old) && !is_null($new) && get_class($old) !== get_class($new)) {
+
                 throw new \InvalidArgumentException('Unable to compare objects of different classes');
             }
 
             $reflectionOld = !is_null($old)?new \ReflectionClass($old):null;
             $reflectionNew = !is_null($new)?new \ReflectionClass($new):null;
+
+            //if map is undefined, we map every properties
+            if (is_null($this->map)) {
+                if (!is_null($reflectionOld)) {
+                    $this->map[get_class($new)] = array();
+                    $properties = $reflectionOld->getProperties();
+                    foreach ($properties as $property) {
+                        $this->map[get_class($new)][] = $property->getName();
+                    }
+                }
+                if (!is_null($reflectionNew)) {
+                     $this->map[get_class($old)] = array();
+                    $properties = $reflectionOld->getProperties();
+                    foreach ($properties as $property) {
+                        $this->map[get_class($new)][] = $property->getName();
+                    }
+                }
+            }
 
             $done = array();
             if (!is_null($reflectionNew) && isset($this->map[get_class($new)])) {
@@ -59,12 +80,12 @@ class DiffEngine
                     if (!is_null($reflectionOld) && $reflectionOld->hasProperty($name)) {
                         $oldProperty = $reflectionOld->getProperty($name);
                         $oldProperty->setAccessible(true);
-                        $subdiff = $this->compare($oldProperty->getValue($old), $property->getValue($new));
+                        $subdiff = $this->compare($oldProperty->getValue($old), $property->getValue($new), $name);
                         if (is_null($status) && $subdiff->isModified()) {
                             $status = Diff::STATUS_MODIFIED;
                         }
                     } else {
-                        $subdiff = $this->compare(null, $property->getValue($new), Diff::STATUS_CREATED);
+                        $subdiff = $this->compare(null, $property->getValue($new), $name, Diff::STATUS_CREATED);
                         if (is_null($status)) {
                             $status = Diff::STATUS_MODIFIED;
                         }
@@ -82,7 +103,7 @@ class DiffEngine
                     $property = $reflectionOld->getProperty($name);
                     if (!isset($done[$name])) {
                         $property->setAccessible(true);
-                        $subdiff = $this->compare($property->getValue($old), null, Diff::STATUS_DELETED);
+                        $subdiff = $this->compare($property->getValue($old), null, $name, Diff::STATUS_DELETED);
                         if (is_null($status)) {
                             $status = Diff::STATUS_MODIFIED;
                         }
@@ -96,13 +117,13 @@ class DiffEngine
             if (is_array($new)) {
                 foreach ($new as $key => $value) {
                     if (is_array($old) && isset($old[$key])) {
-                        $subdiff = $this->compare($old[$key], $value);
+                        $subdiff = $this->compare($old[$key], $value, $key);
                         if (is_null($status) && $subdiff->isModified()) {
                             $status = Diff::STATUS_MODIFIED;
                         }
                         $diff[$key] = $subdiff;
                     } else {
-                        $diff[$key] = $this->compare(null, $value, Diff::STATUS_CREATED);
+                        $diff[$key] = $this->compare(null, $value, $key, Diff::STATUS_CREATED);
                         if (is_null($status)) {
                             $status = Diff::STATUS_MODIFIED;
                         }
@@ -115,7 +136,7 @@ class DiffEngine
             if (is_array($old)) {
                 foreach ($old as $key => $value) {
                     if (!isset($done[$key])) {
-                        $diff[$key] = $this->compare($value, null, Diff::STATUS_DELETED);
+                        $diff[$key] = $this->compare($value, null, $key, Diff::STATUS_DELETED);
                         if (is_null($status)) {
                             $status = Diff::STATUS_MODIFIED;
                         }

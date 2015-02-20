@@ -14,9 +14,11 @@ class Diff implements \Iterator, \ArrayAccess, \Countable
     const STATUS_MODIFIED = 2;
     const STATUS_DELETED = 4;
 
+    protected $identifier;
     protected $status;
     protected $old;
     protected $new;
+    protected $array = array();
     protected $diffs = array();
 
     /**
@@ -25,8 +27,9 @@ class Diff implements \Iterator, \ArrayAccess, \Countable
      * @param mixed $old The old value
      * @param mixed $new The new value
      */
-    public function __construct($old, $new)
+    public function __construct($identifier, $old, $new)
     {
+        $this->identifier = $identifier;
         $this->old = $old;
         $this->new = $new;
     }
@@ -120,12 +123,14 @@ class Diff implements \Iterator, \ArrayAccess, \Countable
         }
 
         if (null === $offset) {
-            $this->diffs[] = $value;
+            $this->array[] = $value;
         } else {
-            $this->diffs[$offset] = $value;
+            $this->array[$offset] = $value;
         }
 
-        reset($this->diffs);
+        $this->addDiff($this->array[$offset]);
+
+        reset($this->array);
     }
 
     /**
@@ -135,7 +140,7 @@ class Diff implements \Iterator, \ArrayAccess, \Countable
      */
     public function offsetExists($offset)
     {
-        return isset($this->diffs[$offset]);
+        return isset($this->array[$offset]);
     }
 
     /**
@@ -145,7 +150,7 @@ class Diff implements \Iterator, \ArrayAccess, \Countable
      */
     public function offsetUnset($offset)
     {
-        unset($this->diffs[$offset]);
+        throw new \Exception('not implemented');
     }
 
     /**
@@ -155,7 +160,16 @@ class Diff implements \Iterator, \ArrayAccess, \Countable
      */
     public function offsetGet($offset)
     {
-        return isset($this->diffs[$offset])?$this->diffs[$offset]:null;
+        return isset($this->array[$offset])?$this->array[$offset]:null;
+    }
+
+    /**
+     *
+     * @param Diff
+     */
+    protected function addDiff(Diff $diff)
+    {
+        $this->diffs[spl_object_hash($diff)] = $diff;
     }
 
     /**
@@ -166,12 +180,10 @@ class Diff implements \Iterator, \ArrayAccess, \Countable
      */
     public function addProperty($name, Diff $diff)
     {
-         $this->{$name} = $diff;
-    }
+        //declare a new public property
+        $this->{$name} = $diff;
 
-    public function getSubdiff()
-    {
-        return $this->diff;
+        $this->addDiff($this->{$name});
     }
 
     /**
@@ -182,8 +194,10 @@ class Diff implements \Iterator, \ArrayAccess, \Countable
     public function getValue()
     {
         if (self::STATUS_DELETED === $this->status) {
+
             return $this->old;
         } else {
+
             return $this->new;
         }
     }
@@ -246,5 +260,15 @@ class Diff implements \Iterator, \ArrayAccess, \Countable
     public function isUnchanged()
     {
         return (self::STATUS_UNCHANGED === $this->status);
+    }
+
+    /**
+     * Gets the value of name.
+     *
+     * @return mixed
+     */
+    public function getIdentifier()
+    {
+        return $this->identifier;
     }
 }
