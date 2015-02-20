@@ -650,11 +650,11 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
 
         $diff = $engine->compare($var1, $var2);
 
-        $this->assertEquals('changed', $diff->private->getNew());
         $this->assertFalse(isset($diff->public));
         $this->assertTrue(isset($diff->private));
         $this->assertFalse(isset($diff->protected));
         $this->assertEquals(1, count($diff));
+        $this->assertEquals('changed', $diff->private->getNew());
 
 
         $engine = new DiffEngine(\ReflectionProperty::IS_PROTECTED);
@@ -664,11 +664,24 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
 
         $diff = $engine->compare($var1, $var2);
 
-        $this->assertEquals('changed', $diff->protected->getNew());
         $this->assertFalse(isset($diff->public));
         $this->assertFalse(isset($diff->private));
         $this->assertTrue(isset($diff->protected));
         $this->assertEquals(1, count($diff));
+        $this->assertEquals('changed', $diff->protected->getNew());
+
+        $engine = new DiffEngine(\ReflectionProperty::IS_PROTECTED | \ReflectionProperty::IS_PRIVATE);
+        $var1 = new DiffEngineObject2();
+        $var2 = new DiffEngineObject2('changed', 'changed', 'changed');
+
+        $diff = $engine->compare($var1, $var2);
+
+        $this->assertFalse(isset($diff->public));
+        $this->assertTrue(isset($diff->private));
+        $this->assertTrue(isset($diff->protected));
+        $this->assertEquals(2, count($diff));
+        $this->assertEquals('changed', $diff->protected->getNew());
+        $this->assertEquals('changed', $diff->private->getNew());
     }
 
     function testCompareObjectsCountable()
