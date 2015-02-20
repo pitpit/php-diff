@@ -38,12 +38,13 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('foo1', $diff->getOld());
         $this->assertEquals('foo2', $diff->getNew());
 
-        //unchanged
+        //same
         $diff = $engine->compare($var2, $var3);
         $this->assertInstanceOf('Pitpit\Component\Diff\Diff', $diff);
         $this->assertFalse($diff->isCreated());
         $this->assertFalse($diff->isModified());
         $this->assertFalse($diff->isDeleted());
+        $this->assertTrue($diff->isSame());
         $this->assertEquals('foo2', $diff->getValue());
         $this->assertEquals('foo2', $diff->getOld());
         $this->assertEquals('foo2', $diff->getNew());
@@ -699,66 +700,63 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(3, $i);
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     */
-    function testCompareObjectTStringException()
+
+    function testCompareObjectTString()
     {
         $engine = new DiffEngine();
         $var1 = new DiffEngineObject();
         $var2 = 'foo';
 
         $diff = $engine->compare($var1, $var2);
+
+        $this->assertTrue($diff->isModified());
+        $this->assertTrue($diff->isUncomparable());
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     */
-    function testCompareStringToObjectException()
+    function testCompareStringToObject()
     {
         $engine = new DiffEngine();
         $var1 = 'foo';
         $var2 = new DiffEngineObject();
 
         $diff = $engine->compare($var1, $var2);
+        $this->assertTrue($diff->isModified());
+        $this->assertTrue($diff->isUncomparable());
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     */
-    function testCompareArrayToObjectException()
+    function testCompareArrayToObject()
     {
         $engine = new DiffEngine();
         $var1 = new DiffEngineObject();
         $var2 = array('foo');
 
         $diff = $engine->compare($var1, $var2);
+        $this->assertTrue($diff->isModified());
+        $this->assertTrue($diff->isUncomparable());
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     */
-    function testCompareObjectToArrayException()
+    function testCompareObjectToArray()
     {
         $engine = new DiffEngine();
         $var1 = array('foo');
         $var2 = new DiffEngineObject();
 
         $diff = $engine->compare($var1, $var2);
+        $this->assertTrue($diff->isModified());
+        $this->assertTrue($diff->isUncomparable());
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     */
-    function testCompareNotSameClassException()
+
+    function testCompareNotSameClass()
     {
         $engine = new DiffEngine();
         $var1 = new DiffEngineObject();
         $var2 = new \StdClass();
 
         $diff = $engine->compare($var1, $var2);
+        $this->assertTrue($diff->isModified());
+        $this->assertTrue($diff->isUncomparable());
     }
-
 
 }
 

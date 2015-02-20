@@ -9,10 +9,11 @@ namespace Pitpit\Component\Diff;
  */
 class Diff implements \Iterator, \ArrayAccess, \Countable
 {
-    const STATUS_UNCHANGED = 0;
+    const STATUS_SAME = 0;
     const STATUS_CREATED = 1;
     const STATUS_MODIFIED = 2;
     const STATUS_DELETED = 4;
+    const STATUS_CANNOT_COMPARE = 999;
 
     protected $identifier;
     protected $status;
@@ -38,13 +39,17 @@ class Diff implements \Iterator, \ArrayAccess, \Countable
      * Set the status of this Diff
      *
      * @param integer $status The status this Diff.
-     *   Could be equal to Diff::STATUS_UNCHANGED, Diff::STATUS_CREATED, Diff::STATUS_MODIFIED or Diff::STATUS_DELETED
      *
      * @throws InvalidArgumentException If given status is not equals to one of the Diff::STATUS_ constant
      */
     public function setStatus($status)
     {
-        if ($status !== self::STATUS_UNCHANGED && $status !== self::STATUS_CREATED && $status !== self::STATUS_MODIFIED && $status !== self::STATUS_DELETED) {
+        if ($status !== self::STATUS_SAME
+            && $status !== self::STATUS_CREATED
+            && $status !== self::STATUS_MODIFIED
+            && $status !== self::STATUS_DELETED
+            && $status !== self::STATUS_CANNOT_COMPARE) {
+
             throw new \InvalidArgumentException(sprintf('Invalid status value "%s"', $status));
         }
 
@@ -249,17 +254,25 @@ class Diff implements \Iterator, \ArrayAccess, \Countable
      */
     public function isModified()
     {
-        return (self::STATUS_MODIFIED === $this->status);
+        return (self::STATUS_MODIFIED === $this->status || self::STATUS_CANNOT_COMPARE === $this->status);
     }
 
     /**
-     * Is the variable is changed
+     * If the variable is modified and is uncomparable deeply (not the same type)
+     */
+    public function isUncomparable()
+    {
+        return (self::STATUS_CANNOT_COMPARE === $this->status);
+    }
+
+    /**
+     * Is the variable is the same
      *
      * @return boolean
      */
-    public function isUnchanged()
+    public function isSame()
     {
-        return (self::STATUS_UNCHANGED === $this->status);
+        return (self::STATUS_SAME === $this->status);
     }
 
     /**
