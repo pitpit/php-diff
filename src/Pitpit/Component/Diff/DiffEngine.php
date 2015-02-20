@@ -9,16 +9,17 @@ namespace Pitpit\Component\Diff;
  */
 class DiffEngine
 {
-    protected $map;
+    protected $filter;
 
     /**
      * Set methods or properties you want to compare in a classe
      *
-     * @param array $map The properties and methods tou want to compare (where keys are  full classname and values the properties or method)
+     * @param ReflectionProperty constants (see http://php.net/manual/en/class.reflectionproperty.php)
+     *
      */
-    public function __construct(array $map = null)
+    public function __construct($filter = null)
     {
-        $this->map = $map;
+        $this->filter = $filter;
     }
 
     /**
@@ -58,27 +59,35 @@ class DiffEngine
             $reflectionOld = !is_null($old)?new \ReflectionClass($old):null;
             $reflectionNew = !is_null($new)?new \ReflectionClass($new):null;
 
-            //if map is undefined, we map every properties
-            if (is_null($this->map)) {
-                if (!is_null($reflectionOld)) {
-                    $this->map[get_class($new)] = array();
+            $map = array();
+
+            if (!is_null($reflectionOld)) {
+                $map[get_class($old)] = array();
+                if ($this->filter) {
+                    $properties = $reflectionOld->getProperties($this->filter);
+                } else {
                     $properties = $reflectionOld->getProperties();
-                    foreach ($properties as $property) {
-                        $this->map[get_class($new)][] = $property->getName();
-                    }
                 }
-                if (!is_null($reflectionNew)) {
-                     $this->map[get_class($old)] = array();
-                    $properties = $reflectionOld->getProperties();
-                    foreach ($properties as $property) {
-                        $this->map[get_class($new)][] = $property->getName();
-                    }
+                foreach ($properties as $property) {
+                    $map[get_class($old)][] = $property->getName();
+                }
+            }
+
+            if (!is_null($reflectionNew)) {
+                $map[get_class($new)] = array();
+                if ($this->filter) {
+                    $properties = $reflectionNew->getProperties($this->filter);
+                } else {
+                    $properties = $reflectionNew->getProperties();
+                }
+                foreach ($properties as $property) {
+                    $map[get_class($new)][] = $property->getName();
                 }
             }
 
             $done = array();
-            if (!is_null($reflectionNew) && isset($this->map[get_class($new)])) {
-                foreach ($this->map[get_class($new)] as $name) {
+            if (!is_null($reflectionNew) && isset($map[get_class($new)])) {
+                foreach ($map[get_class($new)] as $name) {
                     $property = $reflectionNew->getProperty($name);
                     $property->setAccessible(true);
 
@@ -103,8 +112,8 @@ class DiffEngine
                 }
             }
 
-            if (!is_null($reflectionOld) && isset($this->map[get_class($old)])) {
-                foreach ($this->map[get_class($old)] as $name) {
+            if (!is_null($reflectionOld) && isset($map[get_class($old)])) {
+                foreach ($map[get_class($old)] as $name) {
                     $property = $reflectionOld->getProperty($name);
                     if (!isset($done[$name])) {
                         $property->setAccessible(true);
