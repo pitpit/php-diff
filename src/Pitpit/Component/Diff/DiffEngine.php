@@ -41,7 +41,7 @@ class DiffEngine
             //$old or $new could be null
             if ((!is_null($old) && !is_object($old)) || (!is_null($new) && !is_object($new))) {
 
-                $diff->setStatus(Diff::STATUS_CANNOT_COMPARE);
+                $diff->setStatus(Diff::STATUS_TYPE_CHANGE);
 
                 return $diff;
                 //throw new \InvalidArgumentException(sprintf('Unable to compare type "%s" (old) to type "%s" (new), variable: %s', gettype($old), gettype($new), $identifier?$identifier:'null'));
@@ -49,7 +49,7 @@ class DiffEngine
 
             if (!is_null($old) && !is_null($new) && get_class($old) !== get_class($new)) {
 
-                $diff->setStatus(Diff::STATUS_CANNOT_COMPARE);
+                $diff->setStatus(Diff::STATUS_TYPE_CHANGE);
 
                 return $diff;
                 //throw new \InvalidArgumentException(sprintf('Unable to compare objects of different classes, identifier: %s', $identifier?$identifier:'null'));

@@ -710,7 +710,7 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
         $diff = $engine->compare($var1, $var2);
 
         $this->assertTrue($diff->isModified());
-        $this->assertTrue($diff->isUncomparable());
+        $this->assertTrue($diff->isTypeChanged());
     }
 
     function testCompareStringToObject()
@@ -721,7 +721,7 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
 
         $diff = $engine->compare($var1, $var2);
         $this->assertTrue($diff->isModified());
-        $this->assertTrue($diff->isUncomparable());
+        $this->assertTrue($diff->isTypeChanged());
     }
 
     function testCompareArrayToObject()
@@ -732,7 +732,7 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
 
         $diff = $engine->compare($var1, $var2);
         $this->assertTrue($diff->isModified());
-        $this->assertTrue($diff->isUncomparable());
+        $this->assertTrue($diff->isTypeChanged());
     }
 
     function testCompareObjectToArray()
@@ -743,7 +743,7 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
 
         $diff = $engine->compare($var1, $var2);
         $this->assertTrue($diff->isModified());
-        $this->assertTrue($diff->isUncomparable());
+        $this->assertTrue($diff->isTypeChanged());
     }
 
 
@@ -755,7 +755,7 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
 
         $diff = $engine->compare($var1, $var2);
         $this->assertTrue($diff->isModified());
-        $this->assertTrue($diff->isUncomparable());
+        $this->assertTrue($diff->isTypeChanged());
     }
 
 }

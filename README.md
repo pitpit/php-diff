@@ -46,19 +46,19 @@ $toCompare2 = new MyClassToCompare(9);
 
 $engine = new \Pitpit\Component\Diff\DiffEngine();
 
-$diffs = $engine->compare($toCompare1, $toCompare2);
+$diff = $engine->compare($toCompare1, $toCompare2);
 
-if ($diffs->isModified()) {
+if ($diff->isModified()) {
 
     //iterate on each child item to compare (properties, methods, constants)
-    foreach ($diffs as $diff) {
+    foreach ($diff as $element) {
         print_r("----\n");
-        print_r('id: ' . $diff->getIdentifier()."\n");
-        print_r('modified: ' . $diff->isModified()."\n");
-        print_r('created: ' . $diff->isCreated()."\n");
-        print_r('deleted: ' . $diff->isDeleted()."\n");
-        print_r('old: ' . var_export($diff->getOld(), true)."\n");
-        print_r('new: ' . var_export($diff->getNew(), true)."\n");
+        print_r('id: ' . $element->getIdentifier()."\n");
+        print_r('modified: ' . $element->isModified()."\n");
+        print_r('created: ' . $element->isCreated()."\n");
+        print_r('deleted: ' . $element->isDeleted()."\n");
+        print_r('old: ' . print_r($element->getOld(), true)."\n");
+        print_r('new: ' . print_r($element->getNew(), true)."\n");
     }
 }
 ```

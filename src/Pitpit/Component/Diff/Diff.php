@@ -13,7 +13,7 @@ class Diff implements \Iterator, \ArrayAccess, \Countable
     const STATUS_CREATED = 1;
     const STATUS_MODIFIED = 2;
     const STATUS_DELETED = 4;
-    const STATUS_CANNOT_COMPARE = 999;
+    const STATUS_TYPE_CHANGE = 8;
 
     protected $identifier;
     protected $status;
@@ -36,6 +36,16 @@ class Diff implements \Iterator, \ArrayAccess, \Countable
     }
 
     /**
+     * Gets the value of name.
+     *
+     * @return mixed
+     */
+    public function getIdentifier()
+    {
+        return $this->identifier;
+    }
+
+    /**
      * Set the status of this Diff
      *
      * @param integer $status The status this Diff.
@@ -48,7 +58,7 @@ class Diff implements \Iterator, \ArrayAccess, \Countable
             && $status !== self::STATUS_CREATED
             && $status !== self::STATUS_MODIFIED
             && $status !== self::STATUS_DELETED
-            && $status !== self::STATUS_CANNOT_COMPARE) {
+            && $status !== self::STATUS_TYPE_CHANGE) {
 
             throw new \InvalidArgumentException(sprintf('Invalid status value "%s"', $status));
         }
@@ -57,6 +67,8 @@ class Diff implements \Iterator, \ArrayAccess, \Countable
     }
 
     /**
+     * Return the nummber of children
+     *
      * @see Countable
      *
      * {@inheritdoc}
@@ -254,15 +266,15 @@ class Diff implements \Iterator, \ArrayAccess, \Countable
      */
     public function isModified()
     {
-        return (self::STATUS_MODIFIED === $this->status || self::STATUS_CANNOT_COMPARE === $this->status);
+        return (self::STATUS_MODIFIED === $this->status || self::STATUS_TYPE_CHANGE === $this->status);
     }
 
     /**
      * If the variable is modified and is uncomparable deeply (not the same type)
      */
-    public function isUncomparable()
+    public function isTypeChanged()
     {
-        return (self::STATUS_CANNOT_COMPARE === $this->status);
+        return (self::STATUS_TYPE_CHANGE === $this->status);
     }
 
     /**
@@ -273,15 +285,5 @@ class Diff implements \Iterator, \ArrayAccess, \Countable
     public function isSame()
     {
         return (self::STATUS_SAME === $this->status);
-    }
-
-    /**
-     * Gets the value of name.
-     *
-     * @return mixed
-     */
-    public function getIdentifier()
-    {
-        return $this->identifier;
     }
 }
