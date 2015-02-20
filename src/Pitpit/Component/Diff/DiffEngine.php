@@ -39,15 +39,14 @@ class DiffEngine
         if (is_object($old) || is_object($new)) {
 
             //$old or $new could be null
-
             if ((!is_null($old) && !is_object($old)) || (!is_null($new) && !is_object($new))) {
 
-                throw new \InvalidArgumentException(sprintf('Unable to compare an object to a non object (%s -> %s)', print_r($old, true), print_r($new, true)));
+                throw new \InvalidArgumentException(sprintf('Unable to compare type "%s" (old) to type "%s" (new), variable: %s', gettype($old), gettype($new), $identifier?$identifier:'null'));
             }
 
             if (!is_null($old) && !is_null($new) && get_class($old) !== get_class($new)) {
 
-                throw new \InvalidArgumentException('Unable to compare objects of different classes');
+                throw new \InvalidArgumentException(sprintf('Unable to compare objects of different classes, identifier: %s', $identifier?$identifier:'null'));
             }
 
             $reflectionOld = !is_null($old)?new \ReflectionClass($old):null;
