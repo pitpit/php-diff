@@ -60,7 +60,7 @@ class DiffEngine
                         $oldProperty = $reflectionOld->getProperty($name);
                         $oldProperty->setAccessible(true);
                         $subdiff = $this->compare($oldProperty->getValue($old), $property->getValue($new));
-                        if (is_null($status) && $subdiff->getModified()) {
+                        if (is_null($status) && $subdiff->isModified()) {
                             $status = Diff::STATUS_MODIFIED;
                         }
                     } else {
@@ -97,7 +97,7 @@ class DiffEngine
                 foreach ($new as $key => $value) {
                     if (is_array($old) && isset($old[$key])) {
                         $subdiff = $this->compare($old[$key], $value);
-                        if (is_null($status) && $subdiff->getModified()) {
+                        if (is_null($status) && $subdiff->isModified()) {
                             $status = Diff::STATUS_MODIFIED;
                         }
                         $diff[$key] = $subdiff;

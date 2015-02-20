@@ -213,7 +213,7 @@ class Diff implements \Iterator, \ArrayAccess, \Countable
      *
      * @return boolean
      */
-    public function getCreated()
+    public function isCreated()
     {
         return (self::STATUS_CREATED === $this->status);
     }
@@ -223,7 +223,7 @@ class Diff implements \Iterator, \ArrayAccess, \Countable
      *
      * @return boolean
      */
-    public function getDeleted()
+    public function isDeleted()
     {
         return (self::STATUS_DELETED === $this->status);
     }
@@ -233,7 +233,7 @@ class Diff implements \Iterator, \ArrayAccess, \Countable
      *
      * @return boolean
      */
-    public function getModified()
+    public function isModified()
     {
         return (self::STATUS_MODIFIED === $this->status);
     }
@@ -243,7 +243,7 @@ class Diff implements \Iterator, \ArrayAccess, \Countable
      *
      * @return boolean
      */
-    public function getUnchanged()
+    public function isUnchanged()
     {
         return (self::STATUS_UNCHANGED === $this->status);
     }

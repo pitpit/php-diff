@@ -12,10 +12,10 @@ class DiffTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals('old', $diff->getOld());
         $this->assertEquals('new', $diff->getNew());
-        $this->assertFalse($diff->getUnchanged());
-        $this->assertFalse($diff->getCreated());
-        $this->assertFalse($diff->getModified());
-        $this->assertFalse($diff->getDeleted());
+        $this->assertFalse($diff->isUnchanged());
+        $this->assertFalse($diff->isCreated());
+        $this->assertFalse($diff->isModified());
+        $this->assertFalse($diff->isDeleted());
     }
 
     function testGetValue()
@@ -35,10 +35,10 @@ class DiffTest extends \PHPUnit_Framework_TestCase
         $diff = new Diff('old', 'new');
         $diff->setStatus(Diff::STATUS_UNCHANGED);
 
-        $this->assertTrue($diff->getUnchanged());
-        $this->assertFalse($diff->getCreated());
-        $this->assertFalse($diff->getModified());
-        $this->assertFalse($diff->getDeleted());
+        $this->assertTrue($diff->isUnchanged());
+        $this->assertFalse($diff->isCreated());
+        $this->assertFalse($diff->isModified());
+        $this->assertFalse($diff->isDeleted());
     }
 
     function testGetCreated()
@@ -46,10 +46,10 @@ class DiffTest extends \PHPUnit_Framework_TestCase
         $diff = new Diff('old', 'new');
         $diff->setStatus(Diff::STATUS_CREATED);
 
-        $this->assertFalse($diff->getUnchanged());
-        $this->assertTrue($diff->getCreated());
-        $this->assertFalse($diff->getModified());
-        $this->assertFalse($diff->getDeleted());
+        $this->assertFalse($diff->isUnchanged());
+        $this->assertTrue($diff->isCreated());
+        $this->assertFalse($diff->isModified());
+        $this->assertFalse($diff->isDeleted());
     }
 
     function testGetModified()
@@ -57,10 +57,10 @@ class DiffTest extends \PHPUnit_Framework_TestCase
         $diff = new Diff('old', 'new');
         $diff->setStatus(Diff::STATUS_MODIFIED);
 
-        $this->assertFalse($diff->getUnchanged());
-        $this->assertFalse($diff->getCreated());
-        $this->assertTrue($diff->getModified());
-        $this->assertFalse($diff->getDeleted());
+        $this->assertFalse($diff->isUnchanged());
+        $this->assertFalse($diff->isCreated());
+        $this->assertTrue($diff->isModified());
+        $this->assertFalse($diff->isDeleted());
     }
 
     function testGetDeleted()
@@ -68,9 +68,9 @@ class DiffTest extends \PHPUnit_Framework_TestCase
         $diff = new Diff('old', 'new');
         $diff->setStatus(Diff::STATUS_DELETED);
 
-        $this->assertFalse($diff->getUnchanged());
-        $this->assertFalse($diff->getCreated());
-        $this->assertFalse($diff->getModified());
-        $this->assertTrue($diff->getDeleted());
+        $this->assertFalse($diff->isUnchanged());
+        $this->assertFalse($diff->isCreated());
+        $this->assertFalse($diff->isModified());
+        $this->assertTrue($diff->isDeleted());
     }
 }
