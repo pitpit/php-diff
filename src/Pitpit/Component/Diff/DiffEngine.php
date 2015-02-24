@@ -10,19 +10,16 @@ namespace Pitpit\Component\Diff;
 class DiffEngine
 {
     protected $filter;
-    protected $excludes;
 
     /**
      * Set methods or properties you want to compare in a classe
      *
      * @param ReflectionProperty constants (see http://php.net/manual/en/class.reflectionproperty.php)
-     * @param array Mapping of class and properties to exclude
      *
      */
-    public function __construct($filter = null, $excludes = array())
+    public function __construct($filter = null)
     {
         $this->filter = $filter;
-        $this->excludes = $excludes;
     }
 
     /**
@@ -65,33 +62,6 @@ class DiffEngine
             $reflectionNew = !is_null($new)?new \ReflectionClass($new):null;
 
             $map = array_merge($this->buildMap($reflectionOld), $this->buildMap($reflectionNew));
-            // $map = array();
-
-            // if (!is_null($reflectionOld)) {
-            //     $map[get_class($old)] = array();
-            //     if ($this->filter) {
-            //         $properties = $reflectionOld->getProperties($this->filter);
-            //     } else {
-            //         $properties = $reflectionOld->getProperties();
-            //     }
-            //     foreach ($properties as $property) {
-            //         if (!isset($this->exclude[get_class($old)]) || !in_array($property->getName(), $this->exclude[get_class($old)])) {
-            //             $map[get_class($old)][] = $property->getName();
-            //         }
-            //     }
-            // }
-
-            // if (!is_null($reflectionNew)) {
-            //     $map[get_class($new)] = array();
-            //     if ($this->filter) {
-            //         $properties = $reflectionNew->getProperties($this->filter);
-            //     } else {
-            //         $properties = $reflectionNew->getProperties();
-            //     }
-            //     foreach ($properties as $property) {
-            //         $map[get_class($new)][] = $property->getName();
-            //     }
-            // }
 
             $done = array();
             if (!is_null($reflectionNew) && isset($map[get_class($new)])) {
@@ -201,9 +171,7 @@ class DiffEngine
             }
 
             foreach ($properties as $property) {
-                if (!isset($this->excludes[$class]) || !in_array($property->getName(), $this->excludes[$class])) {
-                    $map[$class][] = $property->getName();
-                }
+                $map[$class][] = $property->getName();
             }
         }
 

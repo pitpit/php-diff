@@ -684,25 +684,6 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('changed', $diff->private->getNew());
     }
 
-    function testCompareObjectsExclude()
-    {
-        $engine = new DiffEngine(null, array(
-            'Pitpit\Component\Diff\Tests\DiffEngineObject2' => array(
-                'public'
-            )
-        ));
-
-        $var1 = new DiffEngineObject2();
-        $var2 = new DiffEngineObject2('changed', 'changed', 'changed');
-
-        $diff = $engine->compare($var1, $var2);
-
-        $this->assertFalse(isset($diff->public));
-        $this->assertTrue(isset($diff->private));
-        $this->assertTrue(isset($diff->protected));
-        $this->assertEquals(2, count($diff));
-    }
-
     function testCompareObjectsCountable()
     {
         $engine = new DiffEngine();
