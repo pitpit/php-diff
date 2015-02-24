@@ -3,6 +3,7 @@
 namespace Pitpit\Component\Diff\Tests;
 
 use Pitpit\Component\Diff\DiffEngine;
+use Pitpit\Component\Diff\Diff;
 
 class DiffEngineTest extends \PHPUnit_Framework_TestCase
 {
@@ -16,7 +17,6 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($diff->isCreated());
         $this->assertFalse($diff->isModified());
         $this->assertFalse($diff->isDeleted());
-        $this->assertEquals(null, $diff->getValue());
         $this->assertEquals(null, $diff->getOld());
         $this->assertEquals(null, $diff->getNew());
     }
@@ -34,7 +34,6 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($diff->isCreated());
         $this->assertTrue($diff->isModified());
         $this->assertFalse($diff->isDeleted());
-        $this->assertEquals('foo2', $diff->getValue());
         $this->assertEquals('foo1', $diff->getOld());
         $this->assertEquals('foo2', $diff->getNew());
 
@@ -45,7 +44,6 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($diff->isModified());
         $this->assertFalse($diff->isDeleted());
         $this->assertTrue($diff->isSame());
-        $this->assertEquals('foo2', $diff->getValue());
         $this->assertEquals('foo2', $diff->getOld());
         $this->assertEquals('foo2', $diff->getNew());
     }
@@ -60,7 +58,6 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($diff->isCreated());
         $this->assertTrue($diff->isModified());
         $this->assertFalse($diff->isDeleted());
-        $this->assertEquals('foo1', $diff->getValue());
         $this->assertEquals(null, $diff->getOld());
         $this->assertEquals('foo1', $diff->getNew());
     }
@@ -78,7 +75,6 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($diff->isCreated());
         $this->assertTrue($diff->isModified());
         $this->assertFalse($diff->isDeleted());
-        $this->assertEquals(2, $diff->getValue());
         $this->assertEquals(1, $diff->getOld());
         $this->assertEquals(2, $diff->getNew());
 
@@ -88,7 +84,6 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($diff->isCreated());
         $this->assertFalse($diff->isModified());
         $this->assertFalse($diff->isDeleted());
-        $this->assertEquals(2, $diff->getValue());
         $this->assertEquals(2, $diff->getOld());
         $this->assertEquals(2, $diff->getNew());
     }
@@ -104,7 +99,6 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($diff->isCreated());
         $this->assertTrue($diff->isModified());
         $this->assertFalse($diff->isDeleted());
-        $this->assertEquals(1, $diff->getValue());
         $this->assertEquals(null, $diff->getOld());
         $this->assertEquals(1, $diff->getNew());
 
@@ -123,7 +117,6 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($diff->isCreated());
         $this->assertTrue($diff->isModified());
         $this->assertFalse($diff->isDeleted());
-        $this->assertEquals(true, $diff->getValue());
         $this->assertEquals(false, $diff->getOld());
         $this->assertEquals(true, $diff->getNew());
 
@@ -133,7 +126,6 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($diff->isCreated());
         $this->assertFalse($diff->isModified());
         $this->assertFalse($diff->isDeleted());
-        $this->assertEquals(true, $diff->getValue());
         $this->assertEquals(true, $diff->getOld());
         $this->assertEquals(true, $diff->getNew());
     }
@@ -151,7 +143,6 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($diff->isCreated());
         $this->assertTrue($diff->isModified());
         $this->assertFalse($diff->isDeleted());
-        $this->assertEquals(false, $diff->getValue());
         $this->assertEquals(null, $diff->getOld());
         $this->assertEquals(false, $diff->getNew());
     }
@@ -169,7 +160,6 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($diff->isCreated());
         $this->assertTrue($diff->isModified());
         $this->assertFalse($diff->isDeleted());
-        $this->assertEquals(array('foo2', 'foo3'), $diff->getValue());
         $this->assertEquals(array('foo1'), $diff->getOld());
         $this->assertEquals(array('foo2', 'foo3'), $diff->getNew());
 
@@ -178,16 +168,15 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($subdiff->isCreated());
         $this->assertTrue($subdiff->isModified());
         $this->assertFalse($subdiff->isDeleted());
-        $this->assertEquals('foo2', $subdiff->getValue());
         $this->assertEquals('foo1', $subdiff->getOld());
         $this->assertEquals('foo2', $subdiff->getNew());
 
         $subdiff = $diff[1];
         $this->assertInstanceOf('Pitpit\Component\Diff\Diff', $subdiff);
+
         $this->assertTrue($subdiff->isCreated());
         $this->assertFalse($subdiff->isModified());
         $this->assertFalse($subdiff->isDeleted());
-        $this->assertEquals('foo3', $subdiff->getValue());
         $this->assertEquals(null, $subdiff->getOld());
         $this->assertEquals('foo3', $subdiff->getNew());
 
@@ -197,7 +186,6 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($diff->isCreated());
         $this->assertFalse($diff->isModified());
         $this->assertFalse($diff->isDeleted());
-        $this->assertEquals(array('foo2', 'foo3'), $diff->getValue());
         $this->assertEquals(array('foo2', 'foo3'), $diff->getOld());
         $this->assertEquals(array('foo2', 'foo3'), $diff->getNew());
 
@@ -206,7 +194,6 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($subdiff->isCreated());
         $this->assertFalse($subdiff->isModified());
         $this->assertFalse($subdiff->isDeleted());
-        $this->assertEquals('foo2', $subdiff->getValue());
         $this->assertEquals('foo2', $subdiff->getOld());
         $this->assertEquals('foo2', $subdiff->getNew());
 
@@ -215,7 +202,6 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($subdiff->isCreated());
         $this->assertFalse($subdiff->isModified());
         $this->assertFalse($subdiff->isDeleted());
-        $this->assertEquals('foo3', $subdiff->getValue());
         $this->assertEquals('foo3', $subdiff->getOld());
         $this->assertEquals('foo3', $subdiff->getNew());
 
@@ -242,40 +228,20 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
         //created
         $diff = $engine->compare(null, $var1);
         $this->assertInstanceOf('Pitpit\Component\Diff\Diff', $diff);
-        $this->assertFalse($diff->isCreated());
-        $this->assertTrue($diff->isModified());
+        $this->assertTrue($diff->isCreated());
+        $this->assertFalse($diff->isModified());
         $this->assertFalse($diff->isDeleted());
-        $this->assertEquals(array('foo1'), $diff->getValue());
         $this->assertEquals(null, $diff->getOld());
         $this->assertEquals(array('foo1'), $diff->getNew());
-
-        $subdiff = $diff[0];
-        $this->assertInstanceOf('Pitpit\Component\Diff\Diff', $subdiff);
-        $this->assertTrue($subdiff->isCreated());
-        $this->assertFalse($subdiff->isModified());
-        $this->assertFalse($subdiff->isDeleted());
-        $this->assertEquals('foo1', $subdiff->getValue());
-        $this->assertEquals(null, $subdiff->getOld());
-        $this->assertEquals('foo1', $subdiff->getNew());
 
         //deleted
         $diff = $engine->compare($var1, null);
         $this->assertInstanceOf('Pitpit\Component\Diff\Diff', $diff);
         $this->assertFalse($diff->isCreated());
-        $this->assertTrue($diff->isModified());
-        $this->assertFalse($diff->isDeleted());
-        $this->assertEquals(null, $diff->getValue());
+        $this->assertFalse($diff->isModified());
+        $this->assertTrue($diff->isDeleted());
         $this->assertEquals(array('foo1'), $diff->getOld());
         $this->assertEquals(null, $diff->getNew());
-
-        $subdiff = $diff[0];
-        $this->assertInstanceOf('Pitpit\Component\Diff\Diff', $subdiff);
-        $this->assertFalse($subdiff->isCreated());
-        $this->assertFalse($subdiff->isModified());
-        $this->assertTrue($subdiff->isDeleted());
-        $this->assertEquals('foo1', $subdiff->getValue());
-        $this->assertEquals('foo1', $subdiff->getOld());
-        $this->assertEquals(null, $subdiff->getNew());
     }
 
     function testCompareScalarToArray()
@@ -290,19 +256,9 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($diff->isCreated());
         $this->assertTrue($diff->isModified());
         $this->assertFalse($diff->isDeleted());
-        $this->assertEquals(array('foo2'), $diff->getValue());
         $this->assertEquals('foo1', $diff->getOld());
         $this->assertEquals(array('foo2'), $diff->getNew());
 
-
-        $subdiff = $diff[0];
-        $this->assertInstanceOf('Pitpit\Component\Diff\Diff', $subdiff);
-        $this->assertTrue($subdiff->isCreated());
-        $this->assertFalse($subdiff->isModified());
-        $this->assertFalse($subdiff->isDeleted());
-        $this->assertEquals('foo2', $subdiff->getValue());
-        $this->assertEquals(null, $subdiff->getOld());
-        $this->assertEquals('foo2', $subdiff->getNew());
 
         $var1 = array('foo1');
         $var2 = 'foo2';
@@ -312,44 +268,11 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($diff->isCreated());
         $this->assertTrue($diff->isModified());
         $this->assertFalse($diff->isDeleted());
-        $this->assertEquals('foo2', $diff->getValue());
         $this->assertEquals(array('foo1'), $diff->getOld());
         $this->assertEquals('foo2', $diff->getNew());
 
-        $subdiff = $diff[0];
-        $this->assertInstanceOf('Pitpit\Component\Diff\Diff', $subdiff);
-        $this->assertFalse($subdiff->isCreated());
-        $this->assertFalse($subdiff->isModified());
-        $this->assertTrue($subdiff->isDeleted());
-        $this->assertEquals('foo1', $subdiff->getValue());
-        $this->assertEquals('foo1', $subdiff->getOld());
-        $this->assertEquals(null, $subdiff->getNew());
     }
 
-    function testCompareScalarToArrayIterator()
-    {
-        $engine = new DiffEngine();
-        $var1 = array('foo1');
-        $var2 = 'foo2';
-
-        //created
-        $diff = $engine->compare($var1, $var2);
-
-        //test iterator
-        $i = 0;
-        foreach ($diff as $subdiff) {
-            $i++;
-            $this->assertInstanceOf('Pitpit\Component\Diff\Diff', $subdiff);
-            $this->assertFalse($subdiff->isCreated());
-            $this->assertFalse($subdiff->isModified());
-            $this->assertTrue($subdiff->isDeleted());
-            $this->assertEquals('foo1', $subdiff->getValue());
-            $this->assertEquals('foo1', $subdiff->getOld());
-            $this->assertEquals(null, $subdiff->getNew());
-
-        }
-        $this->assertEquals(1, $i);
-    }
 
     function testCompareScalarToArrayCountable()
     {
@@ -361,7 +284,7 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
         $diff = $engine->compare($var1, $var2);
 
         //test iterator
-        $this->assertEquals(1, count($diff));
+        $this->assertEquals(0, count($diff));
     }
 
     function testCompareNestedArray()
@@ -375,7 +298,6 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($diff->isCreated());
         $this->assertTrue($diff->isModified());
         $this->assertFalse($diff->isDeleted());
-        $this->assertEquals(array(array('bar1', 'bar2')), $diff->getValue());
         $this->assertEquals(array('foo1'), $diff->getOld());
         $this->assertEquals(array(array('bar1', 'bar2')), $diff->getNew());
 
@@ -384,27 +306,8 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($subdiff->isCreated());
         $this->assertTrue($subdiff->isModified());
         $this->assertFalse($subdiff->isDeleted());
-        $this->assertEquals(array('bar1', 'bar2'), $subdiff->getValue());
         $this->assertEquals('foo1', $subdiff->getOld());
         $this->assertEquals(array('bar1', 'bar2'), $subdiff->getNew());
-
-        $subdiff2 = $diff[0][0];
-        $this->assertInstanceOf('Pitpit\Component\Diff\Diff', $subdiff2);
-        $this->assertTrue($subdiff2->isCreated());
-        $this->assertFalse($subdiff2->isModified());
-        $this->assertFalse($subdiff2->isDeleted());
-        $this->assertEquals('bar1', $subdiff2->getValue());
-        $this->assertEquals(null, $subdiff2->getOld());
-        $this->assertEquals('bar1', $subdiff2->getNew());
-
-        $subdiff2 = $diff[0][1];
-        $this->assertInstanceOf('Pitpit\Component\Diff\Diff', $subdiff2);
-        $this->assertTrue($subdiff2->isCreated());
-        $this->assertFalse($subdiff2->isModified());
-        $this->assertFalse($subdiff2->isDeleted());
-        $this->assertEquals('bar2', $subdiff2->getValue());
-        $this->assertEquals(null, $subdiff2->getOld());
-        $this->assertEquals('bar2', $subdiff2->getNew());
     }
 
     function testCompareAssociativeArray()
@@ -419,7 +322,6 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($diff->isCreated());
         $this->assertTrue($diff->isModified());
         $this->assertFalse($diff->isDeleted());
-        $this->assertEquals(array('foo1' => 'bar2', 'foo2' => 'bar2'), $diff->getValue());
         $this->assertEquals(array('foo1' => 'bar1', 'foo3' => 'bar3'), $diff->getOld());
         $this->assertEquals(array('foo1' => 'bar2', 'foo2' => 'bar2'), $diff->getNew());
 
@@ -428,7 +330,6 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($subdiff->isCreated());
         $this->assertTrue($subdiff->isModified());
         $this->assertFalse($subdiff->isDeleted());
-        $this->assertEquals('bar2', $subdiff->getValue());
         $this->assertEquals('bar1', $subdiff->getOld());
         $this->assertEquals('bar2', $subdiff->getNew());
 
@@ -437,7 +338,6 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($subdiff->isCreated());
         $this->assertFalse($subdiff->isModified());
         $this->assertTrue($subdiff->isDeleted());
-        $this->assertEquals('bar3', $subdiff->getValue());
         $this->assertEquals('bar3', $subdiff->getOld());
         $this->assertEquals(null, $subdiff->getNew());
 
@@ -446,7 +346,6 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($subdiff->isCreated());
         $this->assertFalse($subdiff->isModified());
         $this->assertFalse($subdiff->isDeleted());
-        $this->assertEquals('bar2', $subdiff->getValue());
         $this->assertEquals(null, $subdiff->getOld());
         $this->assertEquals('bar2', $subdiff->getNew());
     }
@@ -462,7 +361,6 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($diff->isCreated());
         $this->assertTrue($diff->isModified());
         $this->assertFalse($diff->isDeleted());
-        $this->assertEquals(array('foo2' => array('foo2' => 'bar2'), 'foo3' => 'bar3'), $diff->getValue());
         $this->assertEquals(array('foo1' => 'bar1'), $diff->getOld());
         $this->assertEquals(array('foo2' => array('foo2' => 'bar2'), 'foo3' =>  'bar3'), $diff->getNew());
 
@@ -471,7 +369,6 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($subdiff->isCreated());
         $this->assertFalse($subdiff->isModified());
         $this->assertTrue($subdiff->isDeleted());
-        $this->assertEquals('bar1', $subdiff->getValue());
         $this->assertEquals('bar1', $subdiff->getOld());
         $this->assertEquals(null, $subdiff->getNew());
 
@@ -481,29 +378,18 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($subdiff->isCreated());
         $this->assertFalse($subdiff->isModified());
         $this->assertFalse($subdiff->isDeleted());
-        $this->assertEquals(array('foo2' => 'bar2'), $subdiff->getValue());
         $this->assertEquals(null, $subdiff->getOld());
         $this->assertEquals(array('foo2' => 'bar2'), $subdiff->getNew());
 
-        $subdiff = $diff['foo2']['foo2'];
-        $this->assertInstanceOf('Pitpit\Component\Diff\Diff', $subdiff);
-        $this->assertTrue($subdiff->isCreated());
-        $this->assertFalse($subdiff->isModified());
-        $this->assertFalse($subdiff->isDeleted());
-        $this->assertEquals('bar2', $subdiff->getValue());
-        $this->assertEquals(null, $subdiff->getOld());
-        $this->assertEquals('bar2', $subdiff->getNew());
 
         $subdiff = $diff['foo3'];
         $this->assertInstanceOf('Pitpit\Component\Diff\Diff', $subdiff);
         $this->assertTrue($subdiff->isCreated());
         $this->assertFalse($subdiff->isModified());
         $this->assertFalse($subdiff->isDeleted());
-        $this->assertEquals('bar3', $subdiff->getValue());
         $this->assertEquals(null, $subdiff->getOld());
         $this->assertEquals('bar3', $subdiff->getNew());
     }
-
 
     function testCompareObjects()
     {
@@ -518,7 +404,6 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($diff->isCreated());
         $this->assertTrue($diff->isModified());
         $this->assertFalse($diff->isDeleted());
-        $this->assertEquals($var2, $diff->getValue());
         $this->assertEquals($var1, $diff->getOld());
         $this->assertEquals($var2, $diff->getNew());
 
@@ -527,7 +412,6 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($subdiff->isCreated());
         $this->assertTrue($subdiff->isModified());
         $this->assertFalse($subdiff->isDeleted());
-        $this->assertEquals('foo1', $subdiff->getValue());
         $this->assertEquals(null, $subdiff->getOld());
         $this->assertEquals('foo1', $subdiff->getNew());
 
@@ -536,13 +420,10 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($subdiff->isCreated());
         $this->assertTrue($subdiff->isModified());
         $this->assertFalse($subdiff->isDeleted());
-        $this->assertEquals(array('foo1'), $subdiff->getValue());
         $this->assertEquals(array(), $subdiff->getOld());
         $this->assertEquals(array('foo1'), $subdiff->getNew());
 
     }
-
-
 
     function testCompareNestedObjects()
     {
@@ -555,7 +436,6 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($diff->isCreated());
         $this->assertFalse($diff->isModified());
         $this->assertFalse($diff->isDeleted());
-        $this->assertEquals($var2, $diff->getValue());
         $this->assertEquals($var1, $diff->getOld());
         $this->assertEquals($var2, $diff->getNew());
 
@@ -568,7 +448,6 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($diff->isCreated());
         $this->assertTrue($diff->isModified());
         $this->assertFalse($diff->isDeleted());
-        $this->assertEquals($var2, $diff->getValue());
         $this->assertEquals($var1, $diff->getOld());
         $this->assertEquals($var2, $diff->getNew());
 
@@ -577,7 +456,6 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($subdiff->isCreated());
         $this->assertTrue($subdiff->isModified());
         $this->assertFalse($subdiff->isDeleted());
-        $this->assertEquals(array($object), $subdiff->getValue());
         $this->assertEquals(array(), $subdiff->getOld());
         $this->assertEquals(array($object), $subdiff->getNew());
 
@@ -586,25 +464,14 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($subdiff->isCreated());
         $this->assertFalse($subdiff->isModified());
         $this->assertFalse($subdiff->isDeleted());
-        $this->assertEquals($object, $subdiff->getValue());
         $this->assertEquals(null, $subdiff->getOld());
         $this->assertEquals($object, $subdiff->getNew());
-
-        $subdiff = $diff->objects[0]->scalar;
-        $this->assertInstanceOf('Pitpit\Component\Diff\Diff', $subdiff);
-        $this->assertTrue($subdiff->isCreated());
-        $this->assertFalse($subdiff->isModified());
-        $this->assertFalse($subdiff->isDeleted());
-        $this->assertEquals('foo2', $subdiff->getValue());
-        $this->assertEquals(null, $subdiff->getOld());
-        $this->assertEquals('foo2', $subdiff->getNew());
 
         $diff = $engine->compare($var2, $var1);
         $this->assertInstanceOf('Pitpit\Component\Diff\Diff', $diff);
         $this->assertFalse($diff->isCreated());
         $this->assertTrue($diff->isModified());
         $this->assertFalse($diff->isDeleted());
-        $this->assertEquals($var1, $diff->getValue());
         $this->assertEquals($var2, $diff->getOld());
         $this->assertEquals($var1, $diff->getNew());
 
@@ -613,7 +480,6 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($subdiff->isCreated());
         $this->assertTrue($subdiff->isModified());
         $this->assertFalse($subdiff->isDeleted());
-        $this->assertEquals(array(), $subdiff->getValue());
         $this->assertEquals(array($object), $subdiff->getOld());
         $this->assertEquals(array(), $subdiff->getNew());
 
@@ -622,7 +488,6 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($subdiff->isCreated());
         $this->assertFalse($subdiff->isModified());
         $this->assertTrue($subdiff->isDeleted());
-        $this->assertEquals($object, $subdiff->getValue());
         $this->assertEquals($object, $subdiff->getOld());
         $this->assertEquals(null, $subdiff->getNew());
     }
@@ -684,6 +549,40 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('changed', $diff->private->getNew());
     }
 
+    function testCompareObjectsCompareMethod()
+    {
+        $engine = new DiffEngine(null, array(
+            'Pitpit\Component\Diff\Tests\DiffEngineObject2' => function($diff) {
+
+                //only compare $public properties
+                if ($diff->getOld()->public === $diff->getNew()->public) {
+                    $diff->setStatus(Diff::STATUS_SAME);
+                } else {
+                    $diff->setStatus(Diff::STATUS_MODIFIED);
+                }
+                var_dump($diff);
+            }
+        ));
+
+        $var1 = new DiffEngineObject2();
+        $var2 = new DiffEngineObject2('test', 'changed', 'changed');
+
+        $diff = $engine->compare($var1, $var2);
+
+
+        $this->assertFalse($diff->isModified());
+        $this->assertEquals(0, count($diff));
+
+        $var1 = new DiffEngineObject2();
+        $var2 = new DiffEngineObject2('changed', 'changed', 'changed');
+
+        $diff = $engine->compare($var1, $var2);
+
+        $this->assertTrue($diff->isModified());
+        $this->assertEquals(0, count($diff));
+
+    }
+
     function testCompareObjectsCountable()
     {
         $engine = new DiffEngine();
@@ -737,13 +636,19 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
     }
 
 
-    function testCompareObjectTString()
+    function testCompareObjectToString()
     {
         $engine = new DiffEngine();
         $var1 = new DiffEngineObject();
         $var2 = 'foo';
 
         $diff = $engine->compare($var1, $var2);
+
+        $this->assertTrue($diff->isModified());
+        $this->assertTrue($diff->isTypeChanged());
+
+
+        $diff = $engine->compare($var2, $var1);
 
         $this->assertTrue($diff->isModified());
         $this->assertTrue($diff->isTypeChanged());
@@ -758,6 +663,10 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
         $diff = $engine->compare($var1, $var2);
         $this->assertTrue($diff->isModified());
         $this->assertTrue($diff->isTypeChanged());
+
+        $diff = $engine->compare($var2, $var1);
+        $this->assertTrue($diff->isModified());
+        $this->assertTrue($diff->isTypeChanged());
     }
 
     function testCompareArrayToObject()
@@ -767,6 +676,10 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
         $var2 = array('foo');
 
         $diff = $engine->compare($var1, $var2);
+        $this->assertTrue($diff->isModified());
+        $this->assertTrue($diff->isTypeChanged());
+
+        $diff = $engine->compare($var2, $var1);
         $this->assertTrue($diff->isModified());
         $this->assertTrue($diff->isTypeChanged());
     }
@@ -780,6 +693,11 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
         $diff = $engine->compare($var1, $var2);
         $this->assertTrue($diff->isModified());
         $this->assertTrue($diff->isTypeChanged());
+
+
+        $diff = $engine->compare($var2, $var1);
+        $this->assertTrue($diff->isModified());
+        $this->assertTrue($diff->isTypeChanged());
     }
 
 
@@ -790,6 +708,10 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
         $var2 = new \StdClass();
 
         $diff = $engine->compare($var1, $var2);
+        $this->assertTrue($diff->isModified());
+        $this->assertTrue($diff->isTypeChanged());
+
+        $diff = $engine->compare($var2, $var1);
         $this->assertTrue($diff->isModified());
         $this->assertTrue($diff->isTypeChanged());
     }

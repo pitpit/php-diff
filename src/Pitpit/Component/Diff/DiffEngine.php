@@ -10,6 +10,7 @@ namespace Pitpit\Component\Diff;
 class DiffEngine
 {
     protected $filter;
+    protected $compares;
 
     /**
      * Set methods or properties you want to compare in a classe
@@ -17,9 +18,10 @@ class DiffEngine
      * @param ReflectionProperty constants (see http://php.net/manual/en/class.reflectionproperty.php)
      *
      */
-    public function __construct($filter = null)
+    public function __construct($filter = null, $compares = array())
     {
         $this->filter = $filter;
+        $this->compares = $compares;
     }
 
     /**
@@ -32,121 +34,141 @@ class DiffEngine
      *
      * @return Diff
      */
-    public function compare($old, $new, $identifier = null, $status = null)
+    public function compare($old, $new, $identifier = null)
     {
-        $diff = new Diff($identifier, $old, $new);
+        $diff = new Diff($old, $new, $identifier);
 
-        //compare an objet to something else
-        if (is_object($old) || is_object($new)) {
-
-            //$old or $new could be null
-            if ((!is_null($old) && !is_object($old)) || (!is_null($new) && !is_object($new))) {
-
-                $diff->setStatus(Diff::STATUS_TYPE_CHANGE);
-
-                return $diff;
-                //throw new \InvalidArgumentException(sprintf('Unable to compare type "%s" (old) to type "%s" (new), variable: %s', gettype($old), gettype($new), $identifier?$identifier:'null'));
+        if (null === $new) {
+            if (null === $old) {
+                //same type, same value
+                //nothing to do
+            } else {
+                //new variable is null but not the old
+                $diff->setStatus(Diff::STATUS_DELETED);
             }
+        } else if (is_object($new)) {
+            if (null === $old) {
+                //the new variable is an object but the old is null
+                $diff->setStatus(Diff::STATUS_CREATED);
+            } else if (is_object($old)) {
+                //the both variables are objects
 
-            if (!is_null($old) && !is_null($new) && get_class($old) !== get_class($new)) {
+                $reflectionOld = new \ReflectionClass($old);
+                $reflectionNew = new \ReflectionClass($new);
 
-                $diff->setStatus(Diff::STATUS_TYPE_CHANGE);
+                if ($reflectionNew->getName() !== $reflectionOld->getName()) {
+                    //not the same class
+                    $diff->setStatus(Diff::STATUS_TYPE_CHANGED);
+                } else {
+                    //same class
 
-                return $diff;
-                //throw new \InvalidArgumentException(sprintf('Unable to compare objects of different classes, identifier: %s', $identifier?$identifier:'null'));
-            }
 
+                    //check if a compare closure exists
+                    if (isset($this->compares[$reflectionNew->getName()])) {
 
-
-            $reflectionOld = !is_null($old)?new \ReflectionClass($old):null;
-            $reflectionNew = !is_null($new)?new \ReflectionClass($new):null;
-
-            $map = array_merge($this->buildMap($reflectionOld), $this->buildMap($reflectionNew));
-
-            $done = array();
-            if (!is_null($reflectionNew) && isset($map[get_class($new)])) {
-                foreach ($map[get_class($new)] as $name) {
-                    $property = $reflectionNew->getProperty($name);
-                    $property->setAccessible(true);
-
-                    if (!is_null($reflectionOld) && $reflectionOld->hasProperty($name)) {
-                        $oldProperty = $reflectionOld->getProperty($name);
-                        $oldProperty->setAccessible(true);
-                        $subdiff = $this->compare($oldProperty->getValue($old), $property->getValue($new), $name);
-                        if (is_null($status) && $subdiff->isModified()) {
-                            $status = Diff::STATUS_MODIFIED;
-                        }
+                        $this->compares[$reflectionNew->getName()]($diff);
                     } else {
-                        $subdiff = $this->compare(null, $property->getValue($new), $name, Diff::STATUS_CREATED);
-                        if (is_null($status)) {
-                            $status = Diff::STATUS_MODIFIED;
+
+                        //this is a map of properties to check when comparing
+                        $map = array_merge($this->buildMap($reflectionOld), $this->buildMap($reflectionNew));
+
+                        $done = array();
+
+                        //parse new object
+                        if (isset($map[$reflectionNew->getName()])) {
+                            foreach ($map[$reflectionNew->getName()] as $propertyName) {
+                                $property = $reflectionNew->getProperty($propertyName);
+                                $property->setAccessible(true);
+
+                                if ($reflectionOld->hasProperty($propertyName)) {
+                                    $oldProperty = $reflectionOld->getProperty($propertyName);
+                                    $oldProperty->setAccessible(true);
+                                    $subdiff = $this->compare($oldProperty->getValue($old), $property->getValue($new), $propertyName);
+                                    if ($subdiff->isModified()) {
+                                        $diff->setStatus(Diff::STATUS_MODIFIED);
+                                    }
+                                } else {
+                                    $subdiff = $this->compare(null, $property->getValue($new), $propertyName);
+                                    $subdiff->setStatus(Diff::STATUS_CREATED);
+                                    $diff->setStatus(Diff::STATUS_MODIFIED);
+                                }
+
+                                $diff->addProperty($propertyName, $subdiff);
+
+                                $done[$propertyName] = true;
+                            }
                         }
                     }
-
-                    $diff->addProperty($name, $subdiff);
-
-
-                    $done[$name] = true;
                 }
+            } else {
+                //array or scalar variable (integer, boolean, string)
+                $diff->setStatus(Diff::STATUS_TYPE_CHANGED);
             }
+        } else if (is_array($new)) {
 
-            if (!is_null($reflectionOld) && isset($map[get_class($old)])) {
-                foreach ($map[get_class($old)] as $name) {
-                    $property = $reflectionOld->getProperty($name);
-                    if (!isset($done[$name])) {
-                        $property->setAccessible(true);
-                        $subdiff = $this->compare($property->getValue($old), null, $name, Diff::STATUS_DELETED);
-                        if (is_null($status)) {
-                            $status = Diff::STATUS_MODIFIED;
-                        }
-                        $diff->addProperty($name, $subdiff);
-                    }
-                }
-            }
-        } else if (is_array($old) || is_array($new)) {
+            if (null === $old) {
+                //the new variable is an array but the old is null
+                $diff->setStatus(Diff::STATUS_CREATED);
+            } else if (is_object($old)) {
+                //the new variable is an array but the old is an object
+                $diff->setStatus(Diff::STATUS_TYPE_CHANGED);
+            } else if (is_array($old)) {
+                //the both variables are arrays
 
-            $done = array();
-            if (is_array($new)) {
+                $done = array();
+
+                //parse new array
                 foreach ($new as $key => $value) {
-                    if (is_array($old) && isset($old[$key])) {
+                    if (isset($old[$key])) {
+                        //an old value exists
                         $subdiff = $this->compare($old[$key], $value, $key);
-                        if (is_null($status) && $subdiff->isModified()) {
-                            $status = Diff::STATUS_MODIFIED;
+                        if ($subdiff->isModified() || $subdiff->isCreated() || $subdiff->isDeleted()) {
+                            $diff->setStatus(Diff::STATUS_MODIFIED);
                         }
-                        $diff[$key] = $subdiff;
                     } else {
-                        $diff[$key] = $this->compare(null, $value, $key, Diff::STATUS_CREATED);
-                        if (is_null($status)) {
-                            $status = Diff::STATUS_MODIFIED;
-                        }
+                        $subdiff = new Diff(null, $value, $key);
+                        $subdiff->setStatus(Diff::STATUS_CREATED);
+                        $diff->setStatus(Diff::STATUS_MODIFIED);
                     }
 
+                    $diff[$key] = $subdiff;
                     $done[$key] = true;
                 }
-            }
 
-            if (is_array($old)) {
+                //parse old array
                 foreach ($old as $key => $value) {
                     if (!isset($done[$key])) {
-                        $diff[$key] = $this->compare($value, null, $key, Diff::STATUS_DELETED);
-                        if (is_null($status)) {
-                            $status = Diff::STATUS_MODIFIED;
-                        }
+                        //no new value exists
+                        $subdiff = new Diff($value, null, $key);
+                        $subdiff->setStatus(Diff::STATUS_DELETED);
+                        $diff->setStatus(Diff::STATUS_MODIFIED);
+                        $diff[$key] = $subdiff;
                     }
                 }
+
+            } else {
+                //scalar variable (integer, boolean, string)
+                $diff->setStatus(Diff::STATUS_TYPE_CHANGED);
             }
         } else {
-            //scalar objects
-            if (is_null($status) && $old !== $new) {
-                $status = Diff::STATUS_MODIFIED;
+
+            //scalar variable (integer, boolean, string)
+
+            if (null === $old) {
+                //the new variable is a scalar but the old is null
+
+                // $diff->setStatus(Diff::STATUS_CREATED);
+
+                $diff->setStatus(Diff::STATUS_MODIFIED);
+            } else if (is_object($old)) {
+                //the new variable is a scalar but the old is an object
+                $diff->setStatus(Diff::STATUS_TYPE_CHANGED);
+            } else if (is_array($old)) {
+                $diff->setStatus(Diff::STATUS_TYPE_CHANGED);
+            } else if ($old !== $new) {
+                $diff->setStatus(Diff::STATUS_MODIFIED);
             }
         }
-
-        if (is_null($status)) {
-            $status = Diff::STATUS_SAME;
-        }
-
-        $diff->setStatus($status);
 
         return $diff;
     }

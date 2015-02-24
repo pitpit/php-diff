@@ -9,11 +9,11 @@ namespace Pitpit\Component\Diff;
  */
 class Diff implements \Iterator, \ArrayAccess, \Countable
 {
-    const STATUS_SAME = 0;
-    const STATUS_CREATED = 1;
-    const STATUS_MODIFIED = 2;
-    const STATUS_DELETED = 4;
-    const STATUS_TYPE_CHANGE = 8;
+    const STATUS_SAME = 'same';
+    const STATUS_CREATED = 'created';
+    const STATUS_MODIFIED = 'modified';
+    const STATUS_DELETED = 'deleted';
+    const STATUS_TYPE_CHANGED = 'type_changed';
 
     protected $identifier;
     protected $status;
@@ -28,8 +28,9 @@ class Diff implements \Iterator, \ArrayAccess, \Countable
      * @param mixed $old The old value
      * @param mixed $new The new value
      */
-    public function __construct($identifier, $old, $new)
+    public function __construct($old, $new, $identifier = null)
     {
+        $this->status = self::STATUS_SAME;
         $this->identifier = $identifier;
         $this->old = $old;
         $this->new = $new;
@@ -58,7 +59,7 @@ class Diff implements \Iterator, \ArrayAccess, \Countable
             && $status !== self::STATUS_CREATED
             && $status !== self::STATUS_MODIFIED
             && $status !== self::STATUS_DELETED
-            && $status !== self::STATUS_TYPE_CHANGE) {
+            && $status !== self::STATUS_TYPE_CHANGED) {
 
             throw new \InvalidArgumentException(sprintf('Invalid status value "%s"', $status));
         }
@@ -204,22 +205,6 @@ class Diff implements \Iterator, \ArrayAccess, \Countable
     }
 
     /**
-     * Get the current value of the compared variables.
-     *
-     * @return mixed
-     */
-    public function getValue()
-    {
-        if (self::STATUS_DELETED === $this->status) {
-
-            return $this->old;
-        } else {
-
-            return $this->new;
-        }
-    }
-
-    /**
      * Get the old value of the variable
      *
      * @return mixed|null Null if the variable has been created
@@ -266,7 +251,7 @@ class Diff implements \Iterator, \ArrayAccess, \Countable
      */
     public function isModified()
     {
-        return (self::STATUS_MODIFIED === $this->status || self::STATUS_TYPE_CHANGE === $this->status);
+        return (self::STATUS_MODIFIED === $this->status || self::STATUS_TYPE_CHANGED === $this->status);
     }
 
     /**
@@ -274,7 +259,7 @@ class Diff implements \Iterator, \ArrayAccess, \Countable
      */
     public function isTypeChanged()
     {
-        return (self::STATUS_TYPE_CHANGE === $this->status);
+        return (self::STATUS_TYPE_CHANGED === $this->status);
     }
 
     /**
@@ -285,5 +270,15 @@ class Diff implements \Iterator, \ArrayAccess, \Countable
     public function isSame()
     {
         return (self::STATUS_SAME === $this->status);
+    }
+
+    /**
+     * Gets the value of status.
+     *
+     * @return mixed
+     */
+    public function getStatus()
+    {
+        return $this->status;
     }
 }
