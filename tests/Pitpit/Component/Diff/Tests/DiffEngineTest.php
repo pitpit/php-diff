@@ -7,7 +7,6 @@ use Pitpit\Component\Diff\Diff;
 
 class DiffEngineTest extends \PHPUnit_Framework_TestCase
 {
-
     function testDummyCompare()
     {
         $engine = new DiffEngine();
@@ -549,9 +548,39 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('changed', $diff->private->getNew());
     }
 
-    function testCompareObjectsCompareMethod()
+
+    function testCompareObjectsExclude()
     {
         $engine = new DiffEngine(null, array(
+            'Pitpit\Component\Diff\Tests\DiffEngineObject2' => array(
+                'private',
+                'protected',
+            )
+        ));
+
+        $var1 = new DiffEngineObject2();
+        $var2 = new DiffEngineObject2('test', 'changed', 'changed');
+
+        $diff = $engine->compare($var1, $var2);
+
+        $this->assertFalse($diff->isModified());
+        $this->assertEquals(1, count($diff));
+
+
+
+        $var1 = new DiffEngineObject2();
+        $var2 = new DiffEngineObject2('changed', 'changed', 'changed');
+
+        $diff = $engine->compare($var1, $var2);
+
+        $this->assertTrue($diff->isModified());
+        $this->assertEquals(1, count($diff));
+
+    }
+
+    function testCompareObjectsCompareMethods()
+    {
+        $engine = new DiffEngine(null, null, array(
             'Pitpit\Component\Diff\Tests\DiffEngineObject2' => function($diff) {
 
                 //only compare $public properties
@@ -560,7 +589,6 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
                 } else {
                     $diff->setStatus(Diff::STATUS_MODIFIED);
                 }
-                var_dump($diff);
             }
         ));
 
@@ -568,7 +596,6 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
         $var2 = new DiffEngineObject2('test', 'changed', 'changed');
 
         $diff = $engine->compare($var1, $var2);
-
 
         $this->assertFalse($diff->isModified());
         $this->assertEquals(0, count($diff));
@@ -597,7 +624,6 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(3, count($diff));
 
     }
-
 
     function testCompareObjectsIterator()
     {
@@ -634,7 +660,6 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
         }
         $this->assertEquals(3, $i);
     }
-
 
     function testCompareObjectToString()
     {

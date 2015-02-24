@@ -10,17 +10,21 @@ namespace Pitpit\Component\Diff;
 class DiffEngine
 {
     protected $filter;
-    protected $compares;
+    protected $map;
+    protected $exclude;
 
     /**
      * Set methods or properties you want to compare in a classe
      *
-     * @param ReflectionProperty constants (see http://php.net/manual/en/class.reflectionproperty.php)
+     * @param ReflectionProperty Filter class properties (see http://php.net/manual/en/class.reflectionproperty.php)
+     * @param string[]|null      Exclude specific properties for a specific class. Array where key are fully classified class name
+     * @param Closure[]|null     Function to override comparison for a specific class. Array where key are fully classified class name
      *
      */
-    public function __construct($filter = null, $compares = array())
+    public function __construct($filter = null, $excludes = null, $compares = array())
     {
         $this->filter = $filter;
+        $this->excludes = $excludes;
         $this->compares = $compares;
     }
 
@@ -77,12 +81,26 @@ class DiffEngine
                         //parse new object
                         if (isset($map[$reflectionNew->getName()])) {
                             foreach ($map[$reflectionNew->getName()] as $propertyName) {
+
+                                if (isset($this->excludes[$reflectionNew->getName()])) {
+
+                                    if (in_array($propertyName, $this->excludes[$reflectionNew->getName()])) {
+
+                                        //be sure to not do the test again
+                                        unset($map[$reflectionNew->getName()][$propertyName]);
+                                        continue;
+                                    }
+                                }
+
                                 $property = $reflectionNew->getProperty($propertyName);
+
                                 $property->setAccessible(true);
 
                                 if ($reflectionOld->hasProperty($propertyName)) {
+
                                     $oldProperty = $reflectionOld->getProperty($propertyName);
                                     $oldProperty->setAccessible(true);
+
                                     $subdiff = $this->compare($oldProperty->getValue($old), $property->getValue($new), $propertyName);
                                     if ($subdiff->isModified()) {
                                         $diff->setStatus(Diff::STATUS_MODIFIED);
@@ -179,22 +197,20 @@ class DiffEngine
      *
      * @return array An array where keys are fully classified class names and value arrays of properties
      */
-    protected function buildMap(\ReflectionClass $reflection = null)
+    protected function buildMap(\ReflectionClass $reflection)
     {
         $map = array();
-        if (!is_null($reflection)) {
-            $class = $reflection->getName();
+        $class = $reflection->getName();
 
-            $map[$class] = array();
-            if ($this->filter) {
-                $properties = $reflection->getProperties($this->filter);
-            } else {
-                $properties = $reflection->getProperties();
-            }
+        $map[$class] = array();
+        if ($this->filter) {
+            $properties = $reflection->getProperties($this->filter);
+        } else {
+            $properties = $reflection->getProperties();
+        }
 
-            foreach ($properties as $property) {
-                $map[$class][] = $property->getName();
-            }
+        foreach ($properties as $property) {
+            $map[$class][] = $property->getName();
         }
 
         return $map;
