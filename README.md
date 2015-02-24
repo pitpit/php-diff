@@ -48,19 +48,21 @@ $engine = new \Pitpit\Component\Diff\DiffEngine();
 
 $diff = $engine->compare($toCompare1, $toCompare2);
 
-if ($diff->isModified()) {
+//this closure iterate on each child properties and display where differences are
+$trace = function($diff, $tab = '') use (&$trace) {
 
-    //iterate on each child item to compare (properties, methods, constants)
     foreach ($diff as $element) {
-        print_r("----\n");
-        print_r('id: ' . $element->getIdentifier()."\n");
-        print_r('modified: ' . $element->isModified()."\n");
-        print_r('created: ' . $element->isCreated()."\n");
-        print_r('deleted: ' . $element->isDeleted()."\n");
-        print_r('old: ' . print_r($element->getOld(), true)."\n");
-        print_r('new: ' . print_r($element->getNew(), true)."\n");
+        $c = $element->isTypeChanged()?'T':($element->isModified()?'M':($element->isCreated()?'+':($element->isDeleted()?'-':'=')));
+
+        // print_r(sprintf("%s* %s [%s -> %s] (%s)\n", $tab, $element->getIdentifier(), is_object($element->getOld())?get_class($element->getOld()):gettype($element->getOld()), is_object($element->getNew())?get_class($element->getNew()):gettype($element->getNew()), $c));
+        print_r(sprintf("%s* %s [%s -> %s] (%s)\n", $tab, $element->getIdentifier(), gettype($element->getOld()), gettype($element->getNew()), $c));
+
+
+        if ($diff->isModified()) {
+            $trace($element, $tab . '  ');
+        }
     }
-}
+};
 ```
 
 Run the tests
