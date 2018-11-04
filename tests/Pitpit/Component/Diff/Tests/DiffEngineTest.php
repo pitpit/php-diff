@@ -5,7 +5,7 @@ namespace Pitpit\Component\Diff\Tests;
 use Pitpit\Component\Diff\DiffEngine;
 use Pitpit\Component\Diff\Diff;
 
-class DiffEngineTest extends \PHPUnit_Framework_TestCase
+class DiffEngineTest extends \PHPUnit\Framework\TestCase
 {
     function testDummyCompare()
     {

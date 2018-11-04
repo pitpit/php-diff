@@ -4,7 +4,7 @@ namespace Pitpit\Component\Diff\Tests;
 
 use Pitpit\Component\Diff\Diff;
 
-class DiffTest extends \PHPUnit_Framework_TestCase
+class DiffTest extends \PHPUnit\Framework\TestCase
 {
     function testGetOldGetNew()
     {
