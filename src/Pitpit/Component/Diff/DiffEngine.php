@@ -137,7 +137,7 @@ class DiffEngine
 
                 //parse new array
                 foreach ($new as $key => $value) {
-                    if (isset($old[$key])) {
+                    if (key_exists($key, $old)) {
                         //an old value exists
                         $subdiff = $this->compare($old[$key], $value, $key);
                         if ($subdiff->isModified() || $subdiff->isCreated() || $subdiff->isDeleted()) {

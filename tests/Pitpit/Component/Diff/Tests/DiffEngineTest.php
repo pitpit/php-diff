@@ -5,7 +5,7 @@ namespace Pitpit\Component\Diff\Tests;
 use Pitpit\Component\Diff\DiffEngine;
 use Pitpit\Component\Diff\Diff;
 
-class DiffEngineTest extends \PHPUnit_Framework_TestCase
+class DiffEngineTest extends \PHPUnit\Framework\TestCase
 {
     function testDummyCompare()
     {
@@ -205,6 +205,7 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('foo3', $subdiff->getNew());
 
     }
+
     function testCompareArrayCountable()
     {
         $engine = new DiffEngine();
@@ -241,6 +242,22 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($diff->isDeleted());
         $this->assertEquals(array('foo1'), $diff->getOld());
         $this->assertEquals(null, $diff->getNew());
+    }
+
+    function testCompareNullToNullArray()
+    {
+        $engine = new DiffEngine();
+        $var1 = ["name" => null];
+        $var2 = ["name" => null];
+
+        //same
+        $diff = $engine->compare($var1, $var2);
+        $this->assertInstanceOf('Pitpit\Component\Diff\Diff', $diff);
+        $this->assertFalse($diff->isCreated());
+        $this->assertFalse($diff->isModified());
+        $this->assertFalse($diff->isDeleted());
+        $this->assertEquals(["name" => null], $diff->getOld());
+        $this->assertEquals(["name" => null], $diff->getNew());
     }
 
     function testCompareScalarToArray()
@@ -361,7 +378,7 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($diff->isModified());
         $this->assertFalse($diff->isDeleted());
         $this->assertEquals(array('foo1' => 'bar1'), $diff->getOld());
-        $this->assertEquals(array('foo2' => array('foo2' => 'bar2'), 'foo3' =>  'bar3'), $diff->getNew());
+        $this->assertEquals(array('foo2' => array('foo2' => 'bar2'), 'foo3' => 'bar3'), $diff->getNew());
 
         $subdiff = $diff['foo1'];
         $this->assertInstanceOf('Pitpit\Component\Diff\Diff', $subdiff);
@@ -567,7 +584,6 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(1, count($diff));
 
 
-
         $var1 = new DiffEngineObject2();
         $var2 = new DiffEngineObject2('changed', 'changed', 'changed');
 
@@ -581,7 +597,7 @@ class DiffEngineTest extends \PHPUnit_Framework_TestCase
     function testCompareObjectsCompareMethods()
     {
         $engine = new DiffEngine(null, null, array(
-            'Pitpit\Component\Diff\Tests\DiffEngineObject2' => function($diff) {
+            'Pitpit\Component\Diff\Tests\DiffEngineObject2' => function ($diff) {
 
                 //only compare $public properties
                 if ($diff->getOld()->public === $diff->getNew()->public) {
@@ -756,13 +772,13 @@ class DiffEngineObject2
 {
     public $public = 'test';
     private $private = 'test';
-    protected $protected  = 'test';
+    protected $protected = 'test';
 
     public function __construct($public = 'test', $private = 'test', $protected = 'test')
     {
         $this->public = $public;
         $this->private = $private;
-        $this->protected  = $protected;
+        $this->protected = $protected;
     }
 }
 // @codingStandardsIgnoreEnd
